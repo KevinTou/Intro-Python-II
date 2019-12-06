@@ -86,6 +86,7 @@ def add_item(player, item_name):
         if item[item_name] in player.current_room.contents:
             player.inventory.append(item[item_name])
             player.current_room.contents.remove(item[item_name])
+            print(item[item_name].on_take())
         else:
             print(f"There doesn't seem to be a '{item_name}' around.")
     except:
@@ -97,6 +98,7 @@ def remove_item(player, item_name):
         if item[item_name] in player.inventory:
             player.current_room.contents.append(item[item_name])
             player.inventory.remove(item[item_name])
+            print(item[item_name].on_drop())
         else:
             print(
                 f"There doesn't seem to be a '{item_name}' in your inventory.")

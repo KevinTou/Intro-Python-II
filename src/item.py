@@ -19,7 +19,7 @@ class Item:
         return f"{repr(self.name)}"
 
     def on_take(self):
-        return f"You have picked up {self.name}"
+        return f"\nYou have picked up {self.name}."
 
     def on_drop(self):
-        return f"You have dropped {self.name}"
+        return f"\nYou have dropped {self.name}."
