@@ -53,9 +53,6 @@ room['overlook'].contents = [item['sword']]
 room['narrow'].contents = [item['stick']]
 room['treasure'].contents = [item['bacon'], item['gold']]
 
-x = room['foyer'].contents.index(item['stick'])
-print(x)
-
 #
 # Main
 #
@@ -86,31 +83,25 @@ print(f"{player_name} suddenly gets dropped right outside of a cave.")
 
 def add_item(player, item_name):
     try:
-        print('player', player)
-        print('current room contents', player.current_room.contents)
-        print('type of contents', type(player.current_room.contents))
-        index = player.current_room.contents.index(item[item_name])
-        print(index)
-    # except:
-    #     print('something went wrong :(')
-    # print(item[item_name], 'testing')
-    # print(item.item_name, 'this works')
-
-    # try:
-    #     print(item.item_name, 'this works')
-    #     player.inventory.append(item[item_name])
-    #     player.current_room.contents.remove(item[item_name])
-    # except:
-    #     print(f"'{item_name}' not found.")
+        if item[item_name] in player.current_room.contents:
+            player.inventory.append(item[item_name])
+            player.current_room.contents.remove(item[item_name])
+        else:
+            print(f"There doesn't seem to be a '{item_name}' around.")
+    except:
+        print(f"'{item_name}' is not a valid item.")
 
 
 def remove_item(player, item_name):
     try:
-        player.current_room.contents.append(item.item_name)
-        player.inventory.remove(item.item_name)
+        if item[item_name] in player.inventory:
+            player.current_room.contents.append(item[item_name])
+            player.inventory.remove(item[item_name])
+        else:
+            print(
+                f"There doesn't seem to be a '{item_name}' in your inventory.")
     except:
-        print(f"'{item_name}' not found.")
-
+        print(f"'{item_name}' is not a valid item.")
 
     # Starts game loop
 while True:
@@ -188,16 +179,15 @@ while True:
 
     # Actions
     elif len(command) == 2:
-        item = command[1]
+        user_input_item = command[1]
 
         if command[0] == 'get' or command[0] == 'take':
             # Add item to player's inventory
-            print(item, 'item')
-            add_item(player, item)
+            add_item(player, user_input_item)
             pass
         elif command[0] == 'drop':
             # Remove item from player's inventory
-            remove_item(player, item)
+            remove_item(player, user_input_item)
             pass
         else:
             print(
