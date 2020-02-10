@@ -1,6 +1,9 @@
 from room import Room
+from player import Player
+from item import Item
 
 # Declare all the rooms
+# room is a dict with keys (name of room) and values (Room instance "object")
 
 room = {
     'outside':  Room("Outside Cave Entrance",
@@ -21,9 +24,19 @@ chamber! Sadly, it has already been completely emptied by
 earlier adventurers. The only exit is to the south."""),
 }
 
+item = {
+    'stick':  Item("stick", "a stick! Great for poking people in the eye!"),
+
+    'rock':    Item("rock", """a rock! The rock looks oddly like Chuck Norris..."""),
+
+    'bacon': Item("bacon", """bacon!!!!!!! Oh wait... it doesn't looked cooked. *sad face*"""),
+
+    'sword':   Item("sword", """a sword! You have found the mighty Excalibur!!!!!\nYou notice a marking on the bottom:\nMade in China"""),
+
+    'gold': Item("gold", """gold! The gold is small but it should be worth something..."""),
+}
 
 # Link rooms together
-
 room['outside'].n_to = room['foyer']
 room['foyer'].s_to = room['outside']
 room['foyer'].n_to = room['overlook']
@@ -32,6 +45,13 @@ room['overlook'].s_to = room['foyer']
 room['narrow'].w_to = room['foyer']
 room['narrow'].n_to = room['treasure']
 room['treasure'].s_to = room['narrow']
+
+# Adding items to a rooms
+room['outside'].contents = []
+room['foyer'].contents = [item['rock'], item['stick']]
+room['overlook'].contents = [item['sword']]
+room['narrow'].contents = [item['stick']]
+room['treasure'].contents = [item['bacon'], item['gold']]
 
 #
 # Main
@@ -49,3 +69,133 @@ room['treasure'].s_to = room['narrow']
 # Print an error message if the movement isn't allowed.
 #
 # If the user enters "q", quit the game.
+
+# User input for player's name
+player_name = input(f'What is your name, Adventurer?: ')
+
+# Initializes a new player instance
+player = Player(player_name, room['outside'])
+
+print(f"\nWelcome {player_name}! Embark on a journey with us to new lands!")
+print(f"*flashes occur*")
+print(f"{player_name} suddenly gets dropped right outside of a cave.")
+
+
+def add_item(player, item_name):
+    try:
+        if item[item_name] in player.current_room.contents:
+            player.inventory.append(item[item_name])
+            player.current_room.contents.remove(item[item_name])
+            print(item[item_name].on_take())
+        else:
+            print(f"There doesn't seem to be a '{item_name}' around.")
+    except:
+        print(f"'{item_name}' is not a valid item.")
+
+
+def remove_item(player, item_name):
+    try:
+        if item[item_name] in player.inventory:
+            player.current_room.contents.append(item[item_name])
+            player.inventory.remove(item[item_name])
+            print(item[item_name].on_drop())
+        else:
+            print(
+                f"There doesn't seem to be a '{item_name}' in your inventory.")
+    except:
+        print(f"'{item_name}' is not a valid item.")
+
+    # Starts game loop
+while True:
+    print(f"\n==========================================================================================================")
+    print(f"\n{player.name} is currently at the {player.current_room.name}")
+    print(f"{player.current_room.description}\n")
+
+    user_input = input(f" - Enter a command: ")
+
+    command = user_input.split()
+
+    if len(command) <= 1:
+        # Player quits game
+        if user_input == 'q':
+            break
+        # Check inventory
+        elif user_input == 'i' or user_input == 'inventory':
+            print(f"\n{player.name} opens their inventory.")
+            if len(player.inventory) == 0:
+                print(f'{player.name} has no items yet.')
+            else:
+                print(f'{player.name} has:\n{player.inventory}')
+        elif user_input == 'look':
+            print(f"\n{player.name} looks around {player.current_room.name}.")
+            if len(player.current_room.contents) == 0:
+                print(f"There doesn't seem to be anything here.")
+            else:
+                print(
+                    f"{player.name} found something.\n{player.current_room.name} currently contains {player.current_room.contents}")
+
+        # If possible, moves to next room
+        elif user_input == 'n':
+            if player.current_room.n_to:
+                player.current_room = player.current_room.n_to
+            else:
+                print(f"\n - There is no room to the North.")
+        elif user_input == 'w':
+            if player.current_room.w_to:
+                player.current_room = player.current_room.w_to
+            else:
+                print(f"\n - There is no room to the West.")
+        elif user_input == 's':
+            if player.current_room.s_to:
+                player.current_room = player.current_room.s_to
+            else:
+                print(f"\n - There is no room to the South.")
+        elif user_input == 'e':
+            if player.current_room.e_to:
+                player.current_room = player.current_room.e_to
+            else:
+                print(f"\n - There is no room to the East.")
+        elif user_input == 'commands' or user_input == 'help':
+            print(f"""
+            \n - Help | Commands
+            \n --------------------------------------------------------------------
+            \n - q = Quit Game
+            \n
+            \n - Directions
+            \n --------------------------------------------------------------------
+            \n - n = move North
+            \n - w = move West
+            \n - s = move South
+            \n - e = move East
+            \n
+            \n - Actions
+            \n --------------------------------------------------------------------
+            \n - i | inventory = Look at inventory
+            \n - get <item> | take <item> = Adds item to inventory
+            \n - drop <item> = Drops item from inventory
+            \n - look = Looks for items (displays a list of available items)
+            """)
+        else:
+            print(
+                f"\n - {user_input} is currently not a valid input.\n - Try typing help or commands \n")
+
+    # Actions
+    elif len(command) == 2:
+        user_input_item = command[1]
+
+        if command[0] == 'get' or command[0] == 'take':
+            # Add item to player's inventory
+            add_item(player, user_input_item)
+            pass
+        elif command[0] == 'drop':
+            # Remove item from player's inventory
+            remove_item(player, user_input_item)
+            pass
+        else:
+            print(
+                f"\n - {user_input} is currently not a valid input.\n - Try typing help or commands \n")
+
+    # Invalid input
+    else:
+        print(
+            f"\n - {user_input} is currently not a valid input.\n - Try typing help or commands \n")
